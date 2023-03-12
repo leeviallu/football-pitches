@@ -1,0 +1,24 @@
+[
+    {
+      "id": 0,
+      "name": "Väre Areena",
+      "imgUrl": "/../public/static/Vare-areena.jpg",
+      "address": "Kaartokatu 6, 70620 Kuopio",
+      "neighbourhood": "Haapaniemi"
+    },
+    {
+      "id": 1,
+      "name": "Itkonniemen jalkapallokenttä",
+      "imgUrl": "/../public/static/Itkonniemen-jalkapallokenttä.jpeg",
+      "address": "Dunckerinkatu, 70500 Kuopio",
+      "neighbourhood": "Itkonniemi"
+    },
+    {
+      "id": 300,
+      "name": "Kettulanlahden nurmikenttä",
+      "imgUrl": "/../public/static/kettulanlahti-nurmikentta.jpeg",
+      "address": "Päivärannantie 6, 70400 Kuopio",
+      "neighbourhood": "Kettulanlahti"
+    }
+  ]
+  
