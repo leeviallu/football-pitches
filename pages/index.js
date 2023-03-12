@@ -5,28 +5,14 @@ import Banner from '@/components/banner'
 import Card from '@/components/card'
 
 import footballPitchesData from "../data/football-pitches.json"
+import { fetchFootballPitches } from "../lib/football-pitches"
 
 export async function getStaticProps(context) {
-
-  const options = {
-    method: 'GET',
-    headers: {
-      accept: 'application/json',
-      Authorization: 'fsq3MQ5aC0WWH5be7RqgaTn500UnWf+k5Y2+NgwUKSGVgu8='
-    }
-  };
-  
-  const response = await fetch(
-    'https://api.foursquare.com/v3/places/search?query=football&ll=62.89991149673169%2C27.717305647045922&limit=6', 
-    options
-  );
-  const data = await response.json();
-  console.log(data.results);
-  //  .catch(err => console.error(err));
+  const footballPitches = await fetchFootballPitches();
 
   return {
     props: {
-      footballPitches: data.results,
+      footballPitches,
     }
   }
 }
@@ -55,10 +41,10 @@ export default function Home(props) {
                 return (
                   <Card 
                     alt={footballPitch.name}
-                    key={footballPitch.fsq_id}
+                    key={footballPitch.id}
                     name={footballPitch.name } 
                     imgUrl={footballPitch.imgUrl || "/../public/static/football-pitch.jpeg"} 
-                    href={`/football-pitch/${footballPitch.fsq_id}`}
+                    href={`/football-pitch/${footballPitch.id}`}
                     className={styles.card}
                   />
                   )})}
