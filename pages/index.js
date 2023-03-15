@@ -3,9 +3,10 @@ import styles from '@/styles/Home.module.css'
 
 import Banner from '@/components/banner'
 import Card from '@/components/card'
+import { fetchFootballPitches } from '../lib/football-pitches' 
 
-import footballPitchesData from "../data/football-pitches.json"
-import { fetchFootballPitches } from "../lib/football-pitches"
+import useTrackLocation from '../hooks/use-track-location'
+import { useState, useEffect } from 'react'
 
 export async function getStaticProps(context) {
   const footballPitches = await fetchFootballPitches();
@@ -21,8 +22,35 @@ export async function getStaticProps(context) {
 export default function Home(props) {
   console.log("props:", props)
 
+  const { handleTrackLocation, latLong, locationErrorMsg, isFindingLocation } = useTrackLocation(); 
+
+  const [footballPitches, setFootballPitches] = useState('');
+
+  const [footballPitchesError, setFootballPitchesError] = useState('');
+
+  console.log({ latLong, locationErrorMsg })
+
+  useEffect(() => {
+    async function setFootballPitchesByLocation() {
+      if(latLong) {
+        try {
+          const fetchedFootballPitches = await fetchFootballPitches(latLong, 30);
+          console.log(fetchedFootballPitches);
+          setFootballPitches(fetchedFootballPitches);
+          //set football pitches
+        }
+        catch(error) {
+          console.log(error);
+          setFootballPitchesError(error.message);
+        } 
+      }
+    }
+    setFootballPitchesByLocation();
+  }, [latLong])
+
   const handleOnBannerBtnClick = () => {
     console.log("hi banner button");
+    handleTrackLocation();
   }
 
   return (
@@ -32,9 +60,31 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <Banner buttonText="View pitches nearby" handleOnClick={handleOnBannerBtnClick} />
+        <Banner buttonText={isFindingLocation ? "Locating..." : "View pitches nearby"} handleOnClick={handleOnBannerBtnClick} />
+        {locationErrorMsg && <p>Something went wrong: {locationErrorMsg}</p>}
+        {footballPitchesError && <p>Something went wrong: {footballPitchesError}</p>}
+
+        {footballPitches.length > 0 && (
+          <div className={styles.sectionWrapper}>
+            <h2 className={styles.heading2}>Pitches near me</h2>
+            <div className={styles.cardLayout}>
+              {footballPitches.map(footballPitch => {
+                return (
+                  <Card 
+                    alt={footballPitch.name}
+                    key={footballPitch.id}
+                    name={footballPitch.name } 
+                    imgUrl={footballPitch.imgUrl || "/../public/static/football-pitch.jpeg"} 
+                    href={`/football-pitch/${footballPitch.id}`}
+                    className={styles.card}
+                  />
+                  )})}
+            </div>
+          </div>
+        )}
+
         {props.footballPitches.length > 0 && (
-          <>
+          <div className={styles.sectionWrapper}>
             <h2 className={styles.heading2}>Kuopion jalkapallokentät</h2>
             <div className={styles.cardLayout}>
               {props.footballPitches.map(footballPitch => {
@@ -49,7 +99,7 @@ export default function Home(props) {
                   />
                   )})}
             </div>
-          </>
+          </div>
         )}
       </main>
     </>
