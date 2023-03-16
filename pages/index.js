@@ -6,7 +6,8 @@ import Card from '@/components/card'
 import { fetchFootballPitches } from '../lib/football-pitches' 
 
 import useTrackLocation from '../hooks/use-track-location'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import { ACTION_TYPES, PitchContext } from '../store/pitch-context'
 
 export async function getStaticProps(context) {
   const footballPitches = await fetchFootballPitches();
@@ -22,11 +23,16 @@ export async function getStaticProps(context) {
 export default function Home(props) {
   console.log("props:", props)
 
-  const { handleTrackLocation, latLong, locationErrorMsg, isFindingLocation } = useTrackLocation(); 
+  const { handleTrackLocation, locationErrorMsg, isFindingLocation } = useTrackLocation(); 
 
-  const [footballPitches, setFootballPitches] = useState('');
+  //const [footballPitches, setFootballPitches] = useState('');
 
   const [footballPitchesError, setFootballPitchesError] = useState('');
+
+  const { dispatch, state } = useContext(PitchContext);
+
+  const { footballPitches, latLong } = state;  
+
 
   console.log({ latLong, locationErrorMsg })
 
@@ -36,7 +42,14 @@ export default function Home(props) {
         try {
           const fetchedFootballPitches = await fetchFootballPitches(latLong, 30);
           console.log(fetchedFootballPitches);
-          setFootballPitches(fetchedFootballPitches);
+          //setFootballPitches(fetchedFootballPitches);
+          dispatch({
+            type: ACTION_TYPES.SET_FOOTBALL_PITCHES,
+            payload: {
+               footballPitches: fetchedFootballPitches,
+            }
+          })
+
           //set football pitches
         }
         catch(error) {

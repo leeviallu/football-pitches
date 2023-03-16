@@ -7,24 +7,30 @@ import defaultFootballPitchImg from "../../public/static/football-pitch.jpeg"
 
 import cls from "classnames";
 
-import footballPitchesData from "../../data/football-pitches.json";
-
 import styles from "../../styles/football-pitch.module.css";
 import { fetchFootballPitches } from "../../lib/football-pitches";
+
+import { useContext, useEffect, useState } from "react";
+import { PitchContext } from "../../store/pitch-context"
+
+import { isEmpty } from "../../utils";
 
 export async function getStaticProps(staticProps) {
   const params = staticProps.params;
   console.log("params", params);
+
   const footballPitches = await fetchFootballPitches();
+  const findFootballPitchById = footballPitches.find((footballPitch) => {
+    return footballPitch.id.toString() === params.foo; //dynamic id
+  })
   return {
     props: {
-      footballPitch: footballPitches.find((footballPitch) => {
-        return footballPitch.id.toString() === params.foo; //dynamic id
-      }),
+      footballPitch: findFootballPitchById ? findFootballPitchById : {} , 
     },
-  };
+  }
 
 }
+
 export async function getStaticPaths() {
   const footballPitches = await fetchFootballPitches();
   const paths = footballPitches.map(footballPitch => {
@@ -40,12 +46,34 @@ export async function getStaticPaths() {
   };
 }
 
-const FootballPitch = (props) => {
+const FootballPitch = (initialProps) => {
   const router = useRouter();
   if (router.isFallback) {
     return <div>Loading...</div>;
   }
-  const { location, name, imgUrl } = props.footballPitch;
+
+  const id = router.query.id;
+
+  const [footballPitch, setFootballPitch] = useState(initialProps.footballPitch);
+  
+  const { 
+    state: {
+      footballPitches
+    }
+  } = useContext(PitchContext);
+
+  useEffect(() => {
+    if(isEmpty(initialProps.footballPitch)) {
+      if(footballPitches.length > 0) {
+        const findFootballPitchById = footballPitches.find((footballPitch) => {
+          return footballPitch.id.toString() === foo; //dynamic id
+        })
+        setFootballPitch(findFootballPitchById);
+      }
+    }
+  }, [id])
+
+  const { location, name, imgUrl } = footballPitch;
 
   const handleUpVoteButton = () => {
     console.log("handle upvote")
